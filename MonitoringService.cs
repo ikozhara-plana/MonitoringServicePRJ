@@ -12,11 +12,11 @@ public class MonitoringService : IDisposable
     private readonly string _logFolderPath = @"E:\Projects\RiderProject\Logs";
     private TimeSpan _period;
     private readonly object _lock = new object();
-    private List<StatusData> _statusDataList = new List<StatusData>();
+    private Action<StatusData[]>? _callback;
 
     private MonitoringService() { }
 
-    public MonitoringStatus StartMonitoring(TimeSpan period)
+    public MonitoringStatus StartMonitoring(TimeSpan period, Action<StatusData[]> callback)
     {
         lock (_lock)
         {
@@ -24,6 +24,7 @@ public class MonitoringService : IDisposable
                 throw new InvalidOperationException("Monitoring is already running.");
 
             _period = period;
+            _callback = callback;
             _isMonitoring = true;
             _timer = new Timer(MonitorLogs, null, TimeSpan.Zero, _period);
         }
@@ -38,12 +39,14 @@ public class MonitoringService : IDisposable
             if (!_isMonitoring)
                 throw new InvalidOperationException("Monitoring is not running.");
 
-            return _statusDataList.LastOrDefault() ?? new StatusData
-            {
-                PeriodStart = DateTime.UtcNow,
-                PeriodEnd = DateTime.UtcNow,
-                NumberOfErrors = 0
-            };
+            // Calculate the latest period
+            var periodEnd = DateTime.UtcNow;
+            var periodStart = periodEnd - _period;
+
+            // Re-read logs for the latest period
+            var latestStatusData = ParseLogFiles(periodStart, periodEnd);
+
+            return latestStatusData;
         }
     }
 
@@ -74,8 +77,8 @@ public class MonitoringService : IDisposable
             // Scan log files
             var statusData = ParseLogFiles(periodStart, periodEnd);
 
-            // Save the result
-            _statusDataList.Add(statusData);
+            // Invoke the callback with the current period's status data for single service
+            _callback?.Invoke(new []{statusData});
         }
     }
 
