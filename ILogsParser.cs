@@ -2,5 +2,5 @@
 
 public interface ILogsParser
 {
-    StatusData Parse(DateTime from, DateTime to, string logsPath);
+    Task<StatusData> ParseAsync(DateTime from, DateTime to, string logsPath);
 }

@@ -4,7 +4,7 @@ namespace ConsoleApp1;
 
 public class SensorManagerLogsParser : ILogsParser
 {
-    public StatusData Parse(DateTime from, DateTime to, string logsPath)
+    public async Task<StatusData> ParseAsync(DateTime from, DateTime to, string logsPath)
     {
         int errorCount = 0;
 
@@ -20,12 +20,12 @@ public class SensorManagerLogsParser : ILogsParser
         {
             using (var sr = new StreamReader(new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
-                // Read all lines into a list
                 var lines = new List<string>();
                 while (!sr.EndOfStream)
                 {
-                    lines.Add(sr.ReadLine());
+                    lines.Add(await sr.ReadLineAsync());
                 }
+
                 var relevantLines = lines
                     .Reverse<string>()
                     .Select(line => new { line, timestamp = ExtractTimestamp(line) })
@@ -37,11 +37,9 @@ public class SensorManagerLogsParser : ILogsParser
                     errorCount++;
                 }
 
-                // If not all records were in the range, we stop processing further files
                 if (!relevantLines.Any())
                 {
                     allRecordsInRange = false;
-                    //break;
                 }
             }
 
@@ -62,7 +60,6 @@ public class SensorManagerLogsParser : ILogsParser
 
     private DateTime? ExtractTimestamp(string logLine)
     {
-        // Extract the timestamp from the log line using regex
         var match = Regex.Match(logLine, @"^(?<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}Z)");
         if (match.Success && DateTime.TryParse(match.Groups["timestamp"].Value, out var timestamp))
         {
