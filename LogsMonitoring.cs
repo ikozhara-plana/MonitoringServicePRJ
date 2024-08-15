@@ -32,7 +32,7 @@ public class LogsMonitoring : IDisposable
         return MonitoringStatus.Running;
     }
 
-    public StatusData[] CheckStatus()
+    public async Task<StatusData[]> CheckStatus()
     {
         // Define time period for this monitoring session
         var now = DateTime.UtcNow;
@@ -40,9 +40,15 @@ public class LogsMonitoring : IDisposable
         var to = now;
 
         // Re-read logs for the latest period
-        var latestStatusData = _servicesToMonitor
-            .Select(i => i.LogsParser.Parse(from, to, i.LogsPath)
-                .SetServiceName(i.ServiceName));
+        /*var latestStatusData = _servicesToMonitor
+            .Select(i => i.LogsParser.ParseAsync(from, to, i.LogsPath)
+                .SetServiceName(i.ServiceName));*/
+        var latestStatusData = await Task.WhenAll(_servicesToMonitor
+            .Select(async i =>
+            {
+                var statusData = await i.LogsParser.ParseAsync(from, to, i.LogsPath);
+                return statusData.SetServiceName(i.ServiceName);
+            }));
 
         return latestStatusData.ToArray();
     }
@@ -61,7 +67,7 @@ public class LogsMonitoring : IDisposable
         return MonitoringStatus.Stopped;
     }
 
-    private void MonitorLogs(object? state)
+    private async void MonitorLogs(object? state)
     {
         if (!_isMonitoring) return;
 
@@ -71,9 +77,15 @@ public class LogsMonitoring : IDisposable
         var to = now;
 
         // Scan log files
-        var statusData = _servicesToMonitor
-            .Select(i => i.LogsParser.Parse(from, to, i.LogsPath)
-                .SetServiceName(i.ServiceName));
+        /*var statusData = _servicesToMonitor
+            .Select(i => i.LogsParser.ParseAsync(from, to, i.LogsPath)
+                .SetServiceName(i.ServiceName));*/
+        var statusData = await Task.WhenAll(_servicesToMonitor
+            .Select(async i =>
+            {
+                var statusData = await i.LogsParser.ParseAsync(from, to, i.LogsPath);
+                return statusData.SetServiceName(i.ServiceName);
+            }));
 
         // Invoke the callback with the current period's status data for single service
         _callback?.Invoke(statusData.ToArray());
