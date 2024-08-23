@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "B0lRcK15W4cLA7cfdi0COzqPkrAy+0ooJ03SidgaRM6Y2jKzt4L68PUclMoDCsZ/tzJGlzOYDg21pgB3K/AXUQ==",
+  "dgSpecHash": "wIYp8zYro3CYs6NjTcqHPJ0jOJQH2kThtPPyLU04I/k1ueUpjhot2eujcI39RMw0P3K7rlcmDx3XstTzA6RXPg==",
   "success": true,
   "projectFilePath": "C:\\Users\\illia\\RiderProjects\\ConsoleApp1\\ConsoleApp1\\ConsoleApp1.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\illia\\.nuget\\packages\\serilog\\4.0.1\\serilog.4.0.1.nupkg.sha512"
+  ],
   "logs": []
 }

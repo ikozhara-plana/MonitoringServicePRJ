@@ -13,3 +13,5 @@ C:\Users\illia\RiderProjects\ConsoleApp1\ConsoleApp1\obj\Debug\net6.0\refint\Con
 C:\Users\illia\RiderProjects\ConsoleApp1\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.pdb
 C:\Users\illia\RiderProjects\ConsoleApp1\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.genruntimeconfig.cache
 C:\Users\illia\RiderProjects\ConsoleApp1\ConsoleApp1\obj\Debug\net6.0\ref\ConsoleApp1.dll
+C:\Users\illia\RiderProjects\ConsoleApp1\ConsoleApp1\bin\Debug\net6.0\Serilog.dll
+C:\Users\illia\RiderProjects\ConsoleApp1\ConsoleApp1\obj\Debug\net6.0\ConsoleApp1.csproj.CopyComplete
