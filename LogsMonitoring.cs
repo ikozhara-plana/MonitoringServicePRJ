@@ -44,10 +44,10 @@ public class LogsMonitoring : IDisposable
             .Select(i => i.LogsParser.ParseAsync(from, to, i.LogsPath)
                 .SetServiceName(i.ServiceName));*/
         var latestStatusData = await Task.WhenAll(_servicesToMonitor
-            .Select(async i =>
+            .Select(async serviceToMonitor =>
             {
-                var statusData = await i.LogsParser.ParseAsync(from, to, i.LogsPath);
-                return statusData.SetServiceName(i.ServiceName);
+                var statusData = await serviceToMonitor.LogsParser.ParseAsync(from, to, serviceToMonitor.LogsPath);
+                return statusData.SetServiceName(serviceToMonitor.ServiceName);
             }));
 
         return latestStatusData.ToArray();

@@ -2,28 +2,29 @@
 
 namespace ConsoleApp1;
 
-public class SensorManagerLogsParser : ILogsParser
+public class SerilogLogsParser : ILogsParser
 {
+    private readonly IFilesProvider _filesProvider;
+
+    public SerilogLogsParser(IFilesProvider filesProvider)
+    {
+        _filesProvider = filesProvider;
+    }
+    
     public async Task<StatusData> ParseAsync(DateTime from, DateTime to, string logsPath)
     {
         int errorCount = 0;
-
-        // Get all log files matching the pattern, ordered by their creation date descending
-        var logFiles = new DirectoryInfo(logsPath)
-            .GetFiles("smgr-log-b*.txt")
-            .OrderByDescending(f => f.CreationTimeUtc)
-            .ToList();
-
+        
         bool allRecordsInRange = true;
 
-        foreach (var file in logFiles)
+        foreach (var file in _filesProvider.GetFiles(logsPath))
         {
-            using (var sr = new StreamReader(new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using (var streamReader = new StreamReader(new FileStream(file.FullName, FileMode.Open, FileAccess.Read)))
             {
                 var lines = new List<string>();
-                while (!sr.EndOfStream)
+                while (!streamReader.EndOfStream)
                 {
-                    lines.Add(await sr.ReadLineAsync());
+                    lines.Add(await streamReader.ReadLineAsync());
                 }
 
                 var relevantLines = lines
