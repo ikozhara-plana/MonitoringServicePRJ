@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/obj/Debug/net6.0/ConsoleApp1.AssemblyInfo.cs
+/obj/Debug/net6.0/ConsoleApp1.AssemblyInfoInputs.cache
