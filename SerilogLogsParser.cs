@@ -13,34 +13,38 @@ public class SerilogLogsParser : ILogsParser
     
     public async Task<StatusData> ParseAsync(DateTime from, DateTime to, string logsPath)
     {
-        int errorCount = 0;
-        
+        var relevantLines = new List<string>();
         bool allRecordsInRange = true;
 
         foreach (var file in _filesProvider.GetFiles(logsPath))
         {
             using (var streamReader = new StreamReader(new FileStream(file.FullName, FileMode.Open, FileAccess.Read)))
             {
-                var lines = new List<string>();
                 while (!streamReader.EndOfStream)
                 {
-                    lines.Add(await streamReader.ReadLineAsync());
-                }
+                    var line = await streamReader.ReadLineAsync();
+                    var timestamp = ExtractTimestamp(line);
 
-                var relevantLines = lines
-                    .Reverse<string>()
-                    .Select(line => new { line, timestamp = ExtractTimestamp(line) })
-                    .TakeWhile(entry => entry.timestamp.HasValue && entry.timestamp.Value >= from && entry.timestamp.Value <= to)
-                    .Where(entry => entry.line.Contains("[ERR]"));
-
-                foreach (var entry in relevantLines)
-                {
-                    errorCount++;
-                }
-
-                if (!relevantLines.Any())
-                {
-                    allRecordsInRange = false;
+                    if (timestamp.HasValue)
+                    {
+                        if (timestamp.Value >= from && timestamp.Value <= to)
+                        {
+                            if (line.Contains("[ERR]"))
+                            {
+                                relevantLines.Add(line);
+                            }
+                        }
+                        else if (timestamp.Value < from)
+                        {
+                            // If the timestamp is less than the 'from' time, we can stop reading further
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        // If the line does not meet the timestamp criteria, set allRecordsInRange to false
+                        allRecordsInRange = false;
+                    }
                 }
             }
 
@@ -54,7 +58,7 @@ public class SerilogLogsParser : ILogsParser
         {
             To = to,
             From = from,
-            NumberOfErrors = errorCount,
+            NumberOfErrors = relevantLines.Count,
             Status = "OK"
         };
     }
